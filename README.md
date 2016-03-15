@@ -399,7 +399,7 @@ app.get('api/getLists, function(req, res) {
 But now we want to add the database commands inside the endpoints callback function. Use the `db` variable we declared earlier:
 
 ```
-db.lists.find({_id: req.query.id}, function(err, response){
+db.lists.find(function(err, response){
   if(err) {
     res.status(500).json(err);
   } else {
@@ -409,6 +409,28 @@ db.lists.find({_id: req.query.id}, function(err, response){
 ```
 
 You will need to build out the database commands using mongo commands. As shown above, 'GET' requests will use a `.find` command. Here are the others you will use: 'POST' requests will use a `.save` command. 'PUT' requests will use a `.findAndModify` command. Finally, 'DELETE' requests will use a `.remove` command. Now, look at the mongo docs to find out how to build each database command - [MongoDB CRUD Documentation](https://docs.mongodb.org/manual/crud/).
+
+####
+To build your endpoints that will interact with the database, you will need to understand what each command is doing. Let's look at them one at a time:
+
+##### 'GET' and `.find()`
+With MongoDB, you will use the `.find` method to GET data from your database. This type of command is known as a "query", and it is a "read" command. We will query our database for data - more specifically for "lists" that we have saved onto the database. The `.find` method can simply return everything within a collection, which is what we want for now. So, we use the `db` variable, call the specific collection we want to query - `db.lists` - then add our method to it. Now, with all of these commands, we will pass in a callback function so that we can watch for any errors, or get back a response from the database, so that will be built into the callback function. Here is the endpoint to get all of the data back from the "lists" collection:
+
+```
+app.get('api/getLists', function(req, res) {
+  db.lists.find(function(err, response){
+    if(err) {
+      res.status(500).json(err);
+    } else {
+      res.json(response);
+    }
+  });
+};
+```
+
+Make sure you can identify each piece of this endpoint, and know what it is doing.
+
+##### 'POST' and `.save`
 
 ### Run and Test your Database
 
