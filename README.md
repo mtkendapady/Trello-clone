@@ -31,19 +31,19 @@ and open in browser: localhost:8000
 ### Project introduction
 
 ####
-In this project, you will be building a full-stack app that will be a clone of trello.com. In order to get started, you will need to clone [THIS](https://github.com/DevMountain/trello-clone) repo. You will automatically be on the `master` branch. This branch is the project solution. You may refer to this code if you need to. For each day, you will need to checkout to a new branch. In the new branches we have removed the code that you will be working on that day, but we have left in the rest of the code for the rest of the project. This will give you the ability to test the app after you finish each day's work. After you finish everything for that day, you will be able to fire up your project and see it in your browser. If it pulls up okay, and everything is working, then you know you finished the day's work correctly. If it doesn't work, then you will some more work to do. 
+In this project, you will be building a full-stack app that will be a clone of trello.com. In order to get started, you will need to clone [THIS](https://github.com/DevMountain/trello-clone) repo. You will automatically be on the `master` branch. This branch is the project solution. You may refer to this code if you need to. For each day, you will need to checkout to a new branch. In the new branches we have removed the code that you will be working on that day, but we have left in the rest of the code for the rest of the project. This will give you the ability to test the app after you finish each day's work. After you finish everything for that day, you will be able to fire up your project and see it in your browser. If it pulls up okay, and everything is working, then you know you finished the day's work correctly. If it doesn't work, then you will some more work to do.
 
-Now, at the start of each new day (section), you will need to checkout to the branch that will be associated to that day. So, to start today's work, open your terminal, and navigate (cd) to the root of this project. If you run `ls`, you should see `server.js`. From there, run this command in your terminal: `git checkout day-one`. Now you are ready start today's work. Each day you will run that same command, but with the new branch for that day (ie. `day-two`, `day-three`, etc.). 
+Now, at the start of each new day (section), you will need to checkout to the branch that will be associated to that day. So, to start today's work, open your terminal, and navigate (cd) to the root of this project. If you run `ls`, you should see `server.js`. From there, run this command in your terminal: `git checkout day-one`. Now you are ready start today's work. Each day you will run that same command, but with the new branch for that day (ie. `day-two`, `day-three`, etc.).
 
-Finally, instructions for building this project are in the [Project Guide](http://projectguide.devmounta.in/#/trello-clone). In the project files themselves there will be a few comments and instructions to give you a little bit of a guide, but you will want to follow the instructions in the project guide. 
- 
+Finally, instructions for building this project are in the [Project Guide](http://projectguide.devmounta.in/#/trello-clone). In the project files themselves there will be a few comments and instructions to give you a little bit of a guide, but you will want to follow the instructions in the project guide.
+
 If you have any feedback on the project, or instructions, you can make a change in the project, or on the README.md, then submit a pull request to the DevMountain repository, and we will review those changes. (It will happen a lot faster if you message the link to your pull request to your teacher).
- 
+
 Have fun!
 
 ### Project Setup
 
-#### 
+####
 You will probably notice that the file structure is different than the last project. This setup organizes files by file type. So, in your angular app, you will see that all of the controllers are in one directory, and then the services are in a seperate directory. In the `views` directory, you will see another directory called `partials`. This directory is used for html templates that are used by the directives in this project.
 
 Project organization is determined by the project itself, and then the developers working on the project. You will see different styles of organization used in the programing world, and will probably quickly come to have your own preference for organization.
@@ -345,10 +345,74 @@ DELETE  -->   DELETE <br/>
 
 So... if you are making a 'GET' request from the browser, your server will receive that request, then it will use 'READ' commands to read, (or "get") data on the database in order to complete that request. Or, if your server receives a 'POST' request, it will run 'CREATE' commands to the database to create, or write, new data onto the database. And so on.
 
-### Build requests to your database
+### Start up a mongo instance
 
 ####
 Now we get to put all of our new knowledge into practice! We are going to build out one of each type of request. So, you should be able to run create, read, update, or delete commands within your database. To start off, we need to install and import mongojs in the server.js file. Then define a database instance. You can name the instance "trello-clone", then create a collection called "lists".
 
+####
+Using your terminal (from the root of your project) use npm to install `mongojs`. Then you will require that module in your server.js. Now we need to define a new variable that will start our new instance of MongoDB that we will use for this project. Remember, you will invoke your require variable with the name of the instance as a string, and then a collection that will be in the database, defined as a string in an array.
 
-In your server.js, you will need to create endpoints that will receive all four types of HTTP requests from the browser. Then, within the callback functions of your endpoints, 
+####
+##### Install MongoDB
+In your terminal, run `npm install --save mongojs` from the root of your project
+
+##### Require MongoDB in your server.js
+You will have a line of code in your server.js like this:
+
+```
+var mongoJS = require('mongojs');
+```
+
+##### Start an instance of MongoDB
+Now, to start up an instance of your database, you will use the variable `mongoJS` that you just defined with your require. As mentioned above, we can invoke `mongoJS` and give it a string, then an array of strings as parameters. The string is the name of the database instance - 'trello-clone'. The array of strings will be different collections you can have within your database. We will just use one right now - 'lists'. See the code below:
+
+```
+var db = mongoJS('trello-clone', ['lists']);
+```
+
+This new variable, `db`, will be used to run commands to your database from your server. You will see in the next step that we will use this variable within our endpoints to do the necessary interactions between our server and our database, all dependent on what api calls are made from the browser.
+
+
+### In your endpoints, make requests to your database
+
+####
+In your server.js, you will need to create endpoints that will receive all four types of HTTP requests from the browser. Then, within the callback functions of your endpoints, you will use your new variable that has the defined database instance to run commands to your database depending on what api calls come in from the browser. Here is what each call should do:
+
+'GET' --> Should return all data within the "lists" collection<br/>
+'POST' --> Should receive an object with a new "lists" name, and write that to the database. <br/>
+'PUT' --> Should receive an object with a  "lists" id, and the data you want to change (the "lists" new name).<br/>
+'DELETE' --> Should receive the id number for whichever "list" you want to delete, then delete it from the database.
+
+####
+We can run commands to our database right inside of our endpoints in the server.js files. That's what we will do today, but in the next class it will change a little bit. For now, create four endpoints like we have done already in our Node server. For example, your 'GET' endpoint will look something like this:
+
+```
+app.get('api/getLists, function(req, res) {
+  console.log(req.body);
+  res.send("it worked!");
+};
+```
+
+But now we want to add the database commands inside the endpoints callback function. Use the `db` variable we declared earlier:
+
+```
+db.lists.find({_id: req.query.id}, function(err, response){
+  if(err) {
+    res.status(500).json(err);
+  } else {
+    res.json(response);
+  }
+});
+```
+
+You will need to build out the database commands using mongo commands. As shown above, 'GET' requests will use a `.find` command. Here are the others you will use: 'POST' requests will use a `.save` command. 'PUT' requests will use a `.findAndModify` command. Finally, 'DELETE' requests will use a `.remove` command. Now, look at the mongo docs to find out how to build each database command - [MongoDB CRUD Documentation](https://docs.mongodb.org/manual/crud/).
+
+### Run and Test your Database
+
+####
+You will want to test all four endpoints after you have created them. To do so, you will need to download RoboMongo - if you haven't already. Start up your mongo database (with launchrocket for mac, or just run `mongod` in your terminal), then open RoboMongo. You will see your database instance in the sidebar menu. If you click on that, you will see a directory called "Collections" which, when you open that in the sidebar you will see a collection called "lists"! So cool! Things are starting to come together! Now we just need to populate the database.
+
+Spin up your server, then with postman run a couple 'POST' requests. You should see these populate inside RoboMongo. You can then run a 'GET' request in postman and you should get back all the lists you have made. Now try a 'PUT' request to change some of the data, and a 'DELETE' to delete one of your lists. It's so cool! Great job!!! 
+
+Now that it is all tested and working, you can comment out your code and uncomment the project code to test the trello app, but you haven't really built any of that code yet, because in the next class, we will change up how we interact with MongoDB by introducing mongoose - a library that will help simplify database commands. So, at this point, you can only test your code in postman (unless you want to be ambitious and build out the front end code for your new found database powers of awesomeness).
