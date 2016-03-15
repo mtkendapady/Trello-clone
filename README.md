@@ -441,7 +441,7 @@ app.post('api/addList', function(req, res) {
     } else {
       res.json(response);
     }
-  };
+  });
 };
 ```
 
@@ -496,13 +496,26 @@ app.put('api/updateList', function(req,res) {
     } else {
       res.json(response);
     }
-  };
+  });
 };
 ```
 
 ##### "DELETE" and `.remove()`
-And, last but not least, the "DELETE" request.
+And, last but not least, the "DELETE" request. This method will be like the `findAndModify()` method. This time, you will only need to pass in an id number for the database to query by, then the database will delete that particular "list". So, it should look something like `db.lists.remove({ _id: mongoJS.ObjectId(req.query.id) }, callbackFunction);` So, your full endpoint will look like this:
 
+```
+app.delete('api/removeList', function(req, res) {
+  db.lists.remove({ _id: mongoJS.ObjectId(req.query.id) }, function(err, response){
+    if(err) {
+      res.status(500).json(err);
+    } else {
+      res.json(response);
+    }
+  });
+};
+```
+
+That's it! Now we need to test these endpoints.
 
 ### Run and Test your Database
 
