@@ -408,13 +408,13 @@ db.lists.find(function(err, response){
 });
 ```
 
-You will need to build out the database commands using mongo commands. As shown above, 'GET' requests will use a `.find` command. Here are the others you will use: 'POST' requests will use a `.save` command. 'PUT' requests will use a `.findAndModify` command. Finally, 'DELETE' requests will use a `.remove` command. Now, look at the mongo docs to find out how to build each database command - [MongoDB CRUD Documentation](https://docs.mongodb.org/manual/crud/).
+You will need to build out the database commands using mongo commands. As shown above, 'GET' requests will use a `.find()` command. Here are the others you will use: 'POST' requests will use a `.save()` command. 'PUT' requests will use a `.findAndModify()` command. Finally, 'DELETE' requests will use a `.remove()` command. Now, look at the mongo docs to find out how to build each database command. 
 
 ####
 To build your endpoints that will interact with the database, you will need to understand what each command is doing. Let's look at them one at a time:
 
 ##### 'GET' and `.find()`
-With MongoDB, you will use the `.find` method to GET data from your database. This type of command is known as a "query", and it is a "read" command. We will query our database for data - more specifically for "lists" that we have saved onto the database. The `.find` method can simply return everything within a collection, which is what we want for now. So, we use the `db` variable, call the specific collection we want to query - `db.lists` - then add our method to it. Now, with all of these commands, we will pass in a callback function so that we can watch for any errors, or get back a response from the database, so that will be built into the callback function. Here is the endpoint to get all of the data back from the "lists" collection:
+With MongoDB, you will use the `.find()` method to GET data from your database. This type of command is known as a "query", and it is a "read" command. We will query our database for data - more specifically for "lists" that we have saved onto the database. The `.find()` method can simply return everything within a collection, which is what we want for now. So, we use the `db` variable, call the specific collection we want to query - `db.lists` - then add our method to it. Now, with all of these commands, we will pass in a callback function so that we can watch for any errors, or get back a response from the database, so that will be built into the callback function. Here is the endpoint to get all of the data back from the "lists" collection:
 
 ```
 app.get('api/getLists', function(req, res) {
@@ -430,7 +430,79 @@ app.get('api/getLists', function(req, res) {
 
 Make sure you can identify each piece of this endpoint, and know what it is doing.
 
-##### 'POST' and `.save`
+##### 'POST' and `.save()`
+Like the 'GET' endpoint, we are going to run a method that will run a command to the database. This method is the `.save()` method. It has a little more to it than running a query that returns all the data from a collection. Let's think about this from the front end perspective. In order to make a 'POST' request from the browser, you need to send a data object, right? So then, your server will receive that object in `req.body`. From the server, we need to pass that object on to the database. So, in the `.save()` method, we will pass that object in as an argument, before we pass in the callback function. Again, we start by definig the endpoint - `app.post('api/addList', callbackFunction)` - then inside the callback function, run the `.save()` method on the collection - `db.list.save(dataObject, callbackFunction)`. Our `dataObject` is going to be `req.body`, which holds the data object that the browser sent. Let's see it all toghether:
+
+```
+app.post('api/addList', function(req, res) {
+  db.lists.save(req.body, function(err, response) {
+    if(err) {
+      res.status(500).json(err);
+    } else {
+      res.json(response);
+    }
+  };
+};
+```
+
+##### 'PUT' and `.findAndModify()`
+The `.findAndModify()` method is a lot like the `.save()` - you pass is an object so the database knows what to do. The object you pass in has to have some idenbtifier for what you want to find (eg a specific "list's" id number, or a "list's" name). You will then also need to have the data that you want to change. So, if we have a "list" called 'DevMtn Homework' with and id of '5', and you want to change the name to 'DM Homework', you would tell the database to find the "list" that has the id of '5', then give it an object that would look like this: `{ update: { $set: { name: 'DM Homework' } } }`. `$set` is a new command we haven't seen. If you look into the mongojs, or MongoDB docs, you will see this pattern all over. The object above is telling the database that it is going to change some info on some piece of data that it already has. Once you have queried for that specific piece of data, or in our case, the "list" that has the id number '5', it will "set" the name of that "list" to 'DM Homework'.
+
+There is, however, one part that we are missing. How will the database know to query for that particular "list"? Before we pass the above object in to set the new name, we will use a "query" object that will be pretty similar to the `update` object - `query: { _id: mongoJS.ObjectId(req.query.id) }`. Let's look at this one. `mongoJS.ObjectID()` is a method that takes and id number, and parses it into a MongoDB id. This is necessary, because a MongoDB id is actually a 'number' data type in javascript. ([MDN Types](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures)). It is it's own data type, so we have to parse our number into a "MongoDB id". 
+
+So, here is the data object that we are going to give our `.findAndModify()` method as the first argument:
+
+```
+db.lists.findAndModify({
+    query: {
+      _id: mongoJS.ObjectId(req.query.id) 
+    },
+    update: {
+      $set: req.body
+    }, 
+  }, callbackFunction);
+```
+
+I know that sometimes with the way we lay out objects, it can be harder to tell what is going on. Here is a step by step write out, starting with psudeo-code, that maybe will help with that:
+
+```
+db.lists.findAndModify(dataObject, callbackFunction);
+
+// then build dataObject with a query object and an update object:
+
+db.lists.findAndModify({ query: queryObject, update: updateObject }, callbackFunction);
+
+// Now build the queryObject and updateObject with the respective mongoJS commands:
+
+db.lists.findAndModify({ query: { _id: mongoJS.ObjectId(req.query.id) }, update: { $set: { name: 'DM Homework' } } }, callbackFunction);
+
+// Now you have the same code as above, but just in a single line, rather than split into different lines. 
+```
+
+With that, we can now build this into our endpoint:
+
+```
+app.put('api/updateList', function(req,res) {
+  db.lists.findAndModify({
+    query: {
+      _id: mongoJS.ObjectId(req.query.id) 
+    },
+    update: {
+      $set: req.body
+    }, 
+  }, function(err, response) {
+    if(err) {
+      res.status(500).json(err);
+    } else {
+      res.json(response);
+    }
+  };
+};
+```
+
+##### "DELETE" and `.remove()`
+And, last but not least, the "DELETE" request.
+
 
 ### Run and Test your Database
 
