@@ -525,3 +525,52 @@ You will want to test all four endpoints after you have created them. To do so, 
 Spin up your server, then with postman run a couple 'POST' requests. You should see these populate inside RoboMongo. You can then run a 'GET' request in postman and you should get back all the lists you have made. Now try a 'PUT' request to change some of the data, and a 'DELETE' to delete one of your lists. It's so cool! Great job!!! 
 
 Now that it is all tested and working, you can comment out your code and uncomment the project code to test the trello app, but you haven't really built any of that code yet, because in the next class, we will change up how we interact with MongoDB by introducing mongoose - a library that will help simplify database commands. So, at this point, you can only test your code in postman (unless you want to be ambitious and build out the front end code for your new found database powers of awesomeness).
+
+## MongoDB with Mongoose (Day 5)
+
+### Intro to Mongoose
+
+####
+What is MongooseJS, and why will we want to use it? This blogpost, titled [MongoDB + Mongoose](http://blog.modulus.io/getting-started-with-mongoose) says: "Mongoose is a Node.js library that provides MongoDB object mapping similar to ORM with a familiar interface within Node.js. If you aren't familiar with Object Relational Mapping (ORM) or, Object Data Mapping (ODM) in the case of Mongoose, this means is that Mongoose translates data in the database to JavaScript objects for use in your application." 
+
+Sounds really useful, right? Right! 
+
+And, from [MongooseJS](mongoosejs.com) itself: "Let's face it, writing MongoDB validation, casting and business logic boilerplate is a drag. That's why we wrote Mongoose. Mongoose provides a straight-forward, schema-based solution to model your application data. It includes built-in type casting, validation, query building, business logic hooks and more, out of the box." 
+
+Now you're talking! Let's get started!
+
+### Install and require `mongoose`, and define your MongoDB instance
+
+####
+In the terminal, use `npm` to install `mongoose`, import it into your server.js with `require`, and then setup all your database connections through MongooseJS.
+
+####
+To set up your database connections using MongooseJS, you will need to use the `mongoose.connect()` method. Now let's set `mongoose.connection` to our `db` variable. Now we can run methods like `db.on()` and `db.once()`. In the `db.once()` method, we will tell mongoose to console.log  a message that tells us that the database is running "once" the database is "open" (_hint hint_).
+
+Then, to get error message logged into the terminal, you can use `db.on()`, and specify that "on" any "error" (_hint hint_) we wan to log that error in the console.
+
+####
+After installing MongooseJS by running this command in our terminal, at the root of the project: `npm install --save mongoose`, we need to import the module into our server.js file using this code: `var mongoose = require('mongoose');`.
+Now we can use mongoose as an interface between our NodeJS server and our MongoDB database.
+
+The code to start up our database instance using MongooseJS will look like this:
+
+```
+var mongoUri = 'mongodb://localhost:27017/betterTodo';
+mongoose.connect(mongoUri);
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error: '));
+db.once('open', function() {
+    console.log('connected to db at ' + mongoUri)
+})
+```
+
+### Object Modeling with MongooseJS
+
+####
+
+
+####
+So far, we have built all of our logic into our endpoints. Today we are actually going to import new files called "controllers" into our server.js file, invoke functions that live inside those seperate "controller" files from our endpoints, then build our logic inside there.
+
