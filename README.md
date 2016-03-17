@@ -747,3 +747,7 @@ deleteList: function(req, res) {
   });
 }
 ```
+
+### Test your new backend system
+####
+Now you can run `mongod` and `nodemon server.js` to fire up your backend, then use postman and robomongo to test your new backend. We are not quite to a point that we can use this code in the full project, because there is one more crucial part to making the backend work for our project. If you notice, when you create a "card" on a single "list", it only shows up on that list, and not every single list. How does the database know to only show that particular card on that particular list? There is a way to reference a specific card to a specific list, but we won't learn that until the next lesson. So, if you would like to see the project up and working, you will need to comment out your code, and put the project code back in. This would be a great time to look through the models and controllers we have set up for the project and see you can start to get an understanding of what is going on. 
