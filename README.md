@@ -670,13 +670,13 @@ Now, with your schemas ready, and the enpoints built in your server, you can bui
 ####
 We have the `List` variable now that is importing the `List` Schema. We can query off of this variable and retrieve data to display, or to change, or to delete. We can also instantiate a new instance of the `List` model to create a new list. Let's start with querying for all of the lists.
 
-##### `getLists`
+##### getLists
 The get function is going to query the database and return all of the lists in the `Lists` document. To do that, we will use the `.find()` method on the `Lists` model. Then run the `.exec(callbackFunction);` method to catch any errors and return the error to the browser, or, if there are no errors, return the success result to the browser.
 
-##### `addList`
+##### addList
 Now let's look at adding a list. We don't need to query for any lists on the database, just add a new one. To do that, we need to instantiate a new instance of the `List` model using the "new" keyword and passing in the req.body, then set that to a variable (ie `newlist`), and then run the `.save(callbackFunction);`. The callback function is where you will catch errors, and send an error message, or the success result to the browser.
 
-##### `deleteList`
+##### deleteList
 Finally, let's delete a list from the `Lists` document. We will need to query the database for the particular list you want to remove, then remove it. Luckily, MongooseJS has a method that will do both steps at once - `.findByIdAndRemove(id, callbackFunction);` The id number you want to pass in is a part of the req.body object. You can `console.log(req.body)` to find out how to pass that in. Your callback function will catch errors, and again return an error message, or success result to the browsers.
 
 ####
@@ -711,7 +711,7 @@ module.exports = {
 
 Now the business logic that will run commands to the database will be built inside each function.
 
-##### `getLists`
+##### getLists
 
 ```
 getLists: function(req, res) {
@@ -725,7 +725,7 @@ getLists: function(req, res) {
 
 Keep in mind that you can pass query parameters into the `.find()` method if you want to do a more specific query to the database, like finding a specific list by id, or name.
 
-##### `addList`
+##### addList
 
 ```
 addList: function(req, res) {
@@ -737,7 +737,7 @@ addList: function(req, res) {
 },
 ```
 
-##### `deleteList`
+##### deleteList
 
 ```
 deleteList: function(req, res) {
