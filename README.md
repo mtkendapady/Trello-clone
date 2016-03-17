@@ -568,9 +568,96 @@ db.once('open', function() {
 
 ### Object Modeling with MongooseJS
 
+#### 
+Inside the models files, we are going to build the schemas for our database. So, for your listmodel.js, require `mongoosejs` and make a `Schema` variable. Then build out the `List` Schema. For today, just give each `List` a name. `name` will be required, and will be a 'String'. Then export this new module.
+
+Next, in the usermodel.js, require `mongoosejs` and set your `Schema` variable again. Now build your `User` schema with a username that is required and is a 'String'. Then export this module as well.
+
+Finally, inside your server.js, you will need to import both of those modules using a `require`.
+
 ####
+To build your modules, you need to set `Mongoose.Schema` to the variable `Schema`. This gives us the ability to create a new "instance" of each model on the database. So, for each new list a user makes, it will create a new instance of the list, or user schemas. 
 
+Next, we will create these instances by using the "new" keyword with `Schema`. For example, in listModel.js:
+
+```
+var List = new Schema();
+``` 
+
+Then, pass in an object to `Schema` so that you define what each new schema instance should look like in the database. This goes back to the purpose of MongooseJS to provide MongoDB with "object mapping". MongoDB is a very flexible database, in that you don't need to define what documents are supposed to look like before passing data to it like you would with SQL databases and their tables. However, it would be very beneficial to provide some structure to your database, so that when you call the data at a later point, you have an idea of what it will look like. So, enter MongooseJS, and schemas. We can keep the flexibility of MongoDB as a document database, AND have schemas defined and structured to keep our data organized. 
+
+So... back to what we were doing. We are going to give structure to the data going into our database by passing an object into the `Schema` we just defined above. This will tell our database that anything goes in as a `List` should have a name, and that the name should be a "String", and should be required. 
+
+Finally, use `module.exports` to export this module. MongooseJS has a method that will define the module name - `Mongoose.model()`. It takes two arguments: first, a string with the name that you want the module exported as; second, it takes the variable that you created (`List`) that captures the new instances of the list schema. So something like this: `Mongoose.model('List', List);
+
+Follow this pattern with the userModel.js file as well.
 
 ####
-So far, we have built all of our logic into our endpoints. Today we are actually going to import new files called "controllers" into our server.js file, invoke functions that live inside those seperate "controller" files from our endpoints, then build our logic inside there.
+##### listModel.js
+```
+var Mongoose = require('mongoose');
+var Schema = Mongoose.Schema;
 
+var List = new Schema({
+    name: {
+        type: String,
+        required: true
+    }
+});
+
+module.exports = Mongoose.model('List', List);
+```
+
+##### userModel.js
+```
+var Mongoose = require('mongoose');
+var Schema = Mongoose.Schema;
+
+var User = new Schema({
+    username: {
+        type: String,
+        required: true
+    },
+    lists: [{
+        type: Schema.ObjectId,
+        ref: 'List'
+    }]
+})
+
+module.exports = Mongoose.model('User', User);
+```
+
+### Rewrite the server's endpoints
+
+####
+So far, we have built all of our logic into our endpoints. Today we are actually going to import new files called "controllers" into our server.js file, invoke functions that live inside those seperate "controller" files from our endpoints, then build our logic inside there. This logic is what houses the database interactions and comand. The "controllers" will import the models we just created so that MongooseJS will know what the schemas look like as the interaction with the database happens.
+
+We already have the models built, so now let's build the endpoints in the server.js file, then we will build the "controllers" as the middle pieces. 
+
+Build three endpoints that will be for the `List` schema. 
+
+##### 'GET'
+Build a 'GET' endpoint, and have that invoke a function called `getLists` that will be in the list controller - ie `ListCtrl.getLists`. One interesting thing to note here is that you don't have to have invoking parenthesis. These functions will run without them. That is an "under-the-hood" feature. 
+
+##### 'POST' to add a list
+Now build an endpoint for 'POST' requests that will invoke the function `addList` in the controller.
+
+##### 'POST' to delete a list
+A 'POST request to delete a list? Yep! This is one way to delete a list. We can pass a data object with a 'POST' request, and therefore have the list id that we need in order to query for the correct list, and then remove it from the database (which will happen in the controller in a minute...). This endpoint will invoke a function called `deleteList` in the controller.
+
+Finally, in order for us to call functions inside the controllers like this: `ListCtrl.getLists` we need to define `ListCtrl`. Import the list controller using a require, and giving it the relative path to that file, then set that to a new variable called `ListCtrl`. Now we have imported that file, and can call the methods there that we need to.
+
+####
+To import `ListCtrl` require the file in your server.js like this - `var ListCtrl = require(./api/controllers/ListCtrl.js`
+
+####
+Your endpoints should look like this:
+
+```
+app.get('/api/getLists', ListCtrl.getLists)
+
+app.post('/api/addList', ListCtrl.addList);
+
+app.post('/api/deleteList', ListCtrl.deleteList);
+
+```
