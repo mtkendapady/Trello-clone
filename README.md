@@ -751,3 +751,68 @@ deleteList: function(req, res) {
 ### Test your new backend system
 ####
 Now you can run `mongod` and `nodemon server.js` to fire up your backend, then use postman and robomongo to test your new backend. We are not quite to a point that we can use this code in the full project, because there is one more crucial part to making the backend work for our project. If you notice, when you create a "card" on a single "list", it only shows up on that list, and not every single list. How does the database know to only show that particular card on that particular list? There is a way to reference a specific card to a specific list, but we won't learn that until the next lesson. So, if you would like to see the project up and working, you will need to comment out your code, and put the project code back in. This would be a great time to look through the models and controllers we have set up for the project and see you can start to get an understanding of what is going on. 
+
+
+## Data Relationships (Day 6)
+
+### Building the Models
+
+####
+Now, as mentioned earlier in the project guide, we want to be able to associate a user and his/her lists, and also a list with all of its cards. This association will make so that when you login to the website, you don't get someone else's lists, and your lists won't have the wrong cards in them. With MongooseJS, there is two ways to create these relationships. Referencing a schema inside another schema, or embedding a schema inside another one.
+
+In our project, we are going to reference the `List` schema inside the `User` Schema. So, create the userModel and give the model object a username that is required and is a String. Then, give it a "lists" property. This property will be of the type "Schema.ObjectId", and will reference 'List'.
+
+Then in the `List` schema, we will just embed an object directly into the schema for the cards. So, on the model object, include a property called "cards" that will be an array. The cards within this array will have a title that will be a String and will be required.
+
+####
+So, for the `User` schema, we will reference the user's lists by adding an array on the model object. Inside the array, we are just defining the reference, so there will just be the one object in it. But, when you have a user with multiple lists, you will see in robomongo that the array will be populated with the lists for that user. So, "lists" will be an array with a single object. This object will specify that the reference will be of the type "Schema.ObjecId", and the we are referencing the lists from the `List` document. That part is cool, because it will tell MongoDB to only look in the `List` document for the lists, and won't have to look throught the entire database! Cool, huh?
+
+Then the `List` Schema will have an array of cards for each list. We are just going to embed a "schema-like" object onto a property called "cards" in the model object. "cards" is also going to be an array with the object inside it. Just like the lists array in `User`, "cards" will be populated with each card in each list. The object in the array will have a property called "title". The value of that property will be another object where we can specify the type to be a String, and that we want to require the title for each card.
+
+####
+userModel.js:
+
+```
+var Mongoose = require('mongoose');
+var Schema = Mongoose.Schema;
+
+var User = new Schema({
+    username: {
+        type: String,
+        required: true
+    },
+    lists: [{
+        type: Schema.ObjectId,
+        ref: 'List'
+    }]
+})
+
+module.exports = Mongoose.model('User', User);
+```
+
+listModel.js:
+
+```
+var Mongoose = require('mongoose');
+var Schema = Mongoose.Schema;
+
+var List = new Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    cards: [{
+        title: {
+            type: String,
+            required: true
+        }
+    }]
+})
+
+module.exports = Mongoose.model('List', List);
+```
+
+### Build the Controllers
+
+####
+Now that the schemas have been updated, the functions on our controllers have to change as well.
